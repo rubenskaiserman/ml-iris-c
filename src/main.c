@@ -19,6 +19,42 @@ struct IrisInformationArrays
 };
 
 const int DATA_SIZE = 150;
+struct IrisInformationArrays *getDataFrom(const char *path);
+void printMenu(void);
+
+int main()
+{
+    const char *path = "../database/iris.csv";
+    struct IrisInformationArrays *dataArrays = getDataFrom(path);
+    // Assume-se que foram obtidos os dados
+    int resposta;
+    while (resposta != 3)
+    {
+        if (resposta < 0 || resposta > 3)
+        {
+            printf("------------------------\nOpção inválida.\n------------------------\n");
+        }
+        else if (resposta == 1)
+        {
+            printf("Working on it\n");
+        }
+        else if (resposta == 2)
+        {
+            printf("Working on it\n");
+        }
+        printMenu();
+        scanf("%d", &resposta);
+    }
+
+    // Freeing allocated memory
+    for (int j = 0; j < DATA_SIZE; j++)
+    {
+        free(dataArrays->class[j]);
+    }
+    free(dataArrays);
+
+    return 0;
+}
 
 struct IrisInformationArrays *getDataFrom(const char *path)
 {
@@ -77,7 +113,6 @@ struct IrisInformationArrays *getDataFrom(const char *path)
         arrays->caracteristicas[i][3] = data[i].petal_width;
         arrays->class[i] = data[i].class;
     }
-    
 
     arrays->atributos[0] = "sepal_length";
     arrays->atributos[1] = "sepal_width";
@@ -88,31 +123,9 @@ struct IrisInformationArrays *getDataFrom(const char *path)
     return arrays;
 }
 
-int main()
+void printMenu(void)
 {
-    const char *path = "../database/iris.csv";
-    struct IrisInformationArrays *dataArrays = getDataFrom(path);
-    if (dataArrays != NULL)
-    {
-        // Printing the data for verification
-        for (int j = 0; j < DATA_SIZE; j++)
-        {
-            printf("Iris %d:\n", j + 1);
-            printf("Sepal Length: %.2f\n", dataArrays->caracteristicas[j][0]);
-            printf("Sepal Width: %.2f\n", dataArrays->caracteristicas[j][1]);
-            printf("Petal Length: %.2f\n", dataArrays->caracteristicas[j][2]);
-            printf("Petal Width: %.2f\n", dataArrays->caracteristicas[j][3]);
-            printf("Class: %s\n", dataArrays->class[j]);
-            printf("---------------------\n");
-        }
-    }
-
-    // Freeing allocated memory
-    for (int j = 0; j < DATA_SIZE; j++)
-    {
-        free(dataArrays->class[j]);
-    }
-    free(dataArrays);
-
-    return 0;
+    printf("\n\n\n------------------------------\n");
+    printf("[1] – Mostrar estatísticas\n\n[2] – Classificar amostra\n\n[3] – Sair\n\n");
+    printf("------------------------------\n\n\n");
 }
