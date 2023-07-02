@@ -20,6 +20,6 @@ Máximo: {{MAXIMO_LARGURA_PETALA}}
 Média: {{MEDIA_LARGURA_PETALA}}
 Desvio padrão: {{DESVIO_PADRAO_LARGURA_PETALA}}
 tipo:
-Setosa: {{OCORRENCIAS_SETOSA}}
-Virgínica: {{OCORRENCIAS_VIRGINICA}}
-Versicolor: {{OCORRENCIAS_VISICOLOR}}
+Setosa: {{OCORRENCIAS_SETOSA}} ocorrências
+Virgínica: {{OCORRENCIAS_VIRGINICA}} ocorrências
+Versicolor: {{OCORRENCIAS_VISICOLOR}} ocorrências
