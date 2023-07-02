@@ -3,6 +3,8 @@
 #include <string.h>
 #include <math.h>
 
+
+
 struct IrisInformation
 {
     double sepal_length;
@@ -15,13 +17,20 @@ struct IrisInformation
 struct IrisInformationArrays
 {
     char *atributos[5];
-    double caracteristicas[DATA_LENGTH][4];
-    char *class[DATA_LENGTH];
+    double caracteristicas[150][4];
+    char *class[150];
 };
+const int DATA_LENGTH = 150;
 
-const int DATA_LENGTH = DATA_LENGTH;
 struct IrisInformationArrays *getDataFrom(char *path);
 void printMenu();
+void printStatistics(double caracteristicas[DATA_LENGTH][4], char *atributos[5], char *classes[DATA_LENGTH]);
+double getMinimo(double caracteristicas[DATA_LENGTH][4], int col);
+double getMaximo(double caracteristicas[DATA_LENGTH][4], int col);
+double getMedia(double caracteristicas[DATA_LENGTH][4], int col);
+double desvio_padrao(double caracteristicas[DATA_LENGTH][4], int col);
+int *getAllOcorrencias(char *classes[DATA_LENGTH]);
+int getOcorrencias(char *classes[DATA_LENGTH], char *classe);
 
 
 int main()
@@ -38,7 +47,7 @@ int main()
         }
         else if (resposta == 1)
         {
-            printf("Working on it\n");
+            printStatistics(dataArrays->caracteristicas, dataArrays->atributos, dataArrays->class);
         }
         else if (resposta == 2)
         {
@@ -134,6 +143,32 @@ void printMenu()
     printf("------------------------------\n\n\n");
 }
 
+void printStatistics(double caracteristicas[DATA_LENGTH][4], char *atributos[5], char *classes[DATA_LENGTH]) {
+    printf("------------------------------\n");
+    printf("Estatísticas\n");
+    printf("------------------------------\n");
+
+
+    getAllOcorrencias(classes);
+
+
+    for(int i = 0; i < 4; i++) {
+        printf("%s\n", atributos[i]);
+        printf("Mínimo: %lf\n", getMinimo(caracteristicas, i));
+        printf("Máximo: %lf\n", getMaximo(caracteristicas, i));
+        printf("Média: %lf\n", getMedia(caracteristicas, i));
+        printf("Desvio padrão: %lf\n", desvio_padrao(caracteristicas, i));
+        printf("------------------------------\n");
+    }
+    printf("Classes\n");
+    printf("------------------------------\n");
+    int *ocorrencias = malloc(3 * sizeof(int));
+    ocorrencias = getAllOcorrencias(classes);
+    printf("Iris-setosa: %d ocorrências\n", ocorrencias[0]);
+    printf("Iris-versicolor: %d ocorrências\n", ocorrencias[1]);
+    printf("Iris-virginica: %d ocorrências\n", ocorrencias[2]);
+}
+
 double getMinimo(double caracteristicas[DATA_LENGTH][4], int col) {
     double minimo = caracteristicas[0][col];
     for(int i = 0; i < DATA_LENGTH; i++) {
@@ -164,6 +199,10 @@ double getMedia(double caracteristicas[DATA_LENGTH][4], int col) {
 }
 
 double desvio_padrao(double caracteristicas[DATA_LENGTH][4], int col) {
+    // Pesquisei por calculo de desvio padrão no google e foi o que eu achei em:
+    // https://pt.khanacademy.org/math/statistics-probability/summarizing-quantitative-data/variance-standard-deviation-population/a/calculating-standard-deviation-step-by-step
+    // Ficou bem perto do exemplo e faz sentido, portanto foi mantido assim.
+
     double media = getMedia(caracteristicas, col);
     double desvio_padrao = 0;
     for(int i = 0; i < DATA_LENGTH; i++) {
@@ -173,4 +212,33 @@ double desvio_padrao(double caracteristicas[DATA_LENGTH][4], int col) {
     desvio_padrao = sqrt(desvio_padrao);
 
     return desvio_padrao;
+}
+
+int *getAllOcorrencias(char *classes[DATA_LENGTH]) {
+    int *ocorrencias = malloc(3 * sizeof(int));
+
+    ocorrencias[0] = getOcorrencias(classes, "setosa\r\n");
+    ocorrencias[1] = getOcorrencias(classes, "versicolor\r\n");
+    ocorrencias[2] = getOcorrencias(classes, "virginica\r\n");
+    // Contudo todavia e entretanto, o \r\n é necessário para o strcmp funcionar.
+    // Pois, aparentemente, o csv foi gerado no Windows e o \r\n é o caractere de quebra de linha no Windows.
+    // Daí para realizar a comparação de strings é necessário que o \r\n esteja presente.
+    
+    ocorrencias[0] += getOcorrencias(classes, "setosa");
+    ocorrencias[1] += getOcorrencias(classes, "versicolor");
+    ocorrencias[2] += getOcorrencias(classes, "virginica");
+    // O item final não tem quebra de linha então é necessário fazer a comparação sem o \r\n.
+    // Existem soluções mais eficientes mas eu diria que essa é a mais visível e fácil de entender.
+
+    return ocorrencias;
+}
+
+int getOcorrencias(char *classes[DATA_LENGTH], char *classe) {
+    int ocorrencias = 0;
+    for(int i = 0; i < DATA_LENGTH; i++) {
+        if(strcmp(classes[i], classe) == 0) {
+            ocorrencias++;
+        }
+    }
+    return ocorrencias;
 }
