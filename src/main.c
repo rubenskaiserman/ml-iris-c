@@ -3,8 +3,6 @@
 #include <string.h>
 #include <math.h>
 
-
-
 struct IrisInformation
 {
     double sepal_length;
@@ -31,13 +29,16 @@ double getMedia(double caracteristicas[DATA_LENGTH][4], int col);
 double desvio_padrao(double caracteristicas[DATA_LENGTH][4], int col);
 int *getAllOcorrencias(char *classes[DATA_LENGTH]);
 int getOcorrencias(char *classes[DATA_LENGTH], char *classe);
-
+char* guessClass(double attributes[DATA_LENGTH][4], char* classes[DATA_LENGTH], struct IrisInformation input);
+double dist(double attr1[4], double attr2[4]);
 
 int main()
 {
     char *path = "../database/iris.csv";
     struct IrisInformationArrays *dataArrays = getDataFrom(path);
     // Assume-se que foram obtidos os dados
+    struct IrisInformation input;
+    char *class = malloc(256 * sizeof(char));
     int resposta;
     while (resposta != 3)
     {
@@ -51,7 +52,18 @@ int main()
         }
         else if (resposta == 2)
         {
-            printf("Working on it\n");
+            printf("Insira a amostra a ser classificada...\n\n");
+            printf("Comprimento da Sepala: ");
+            scanf("%lf", &input.sepal_length);
+            printf("Largura da Sepala: ");
+            scanf("%lf", &input.sepal_width);
+            printf("Comprimento da Petala: ");
+            scanf("%lf", &input.petal_length);
+            printf("Largura da Petala: ");
+            scanf("%lf", &input.petal_width);
+            
+            class = guessClass(dataArrays->caracteristicas, dataArrays->class, input);
+            printf("\n\nA classe da amostra é: %s\n\n\n", class);
         }
         printMenu();
         scanf("%d", &resposta);
@@ -63,7 +75,9 @@ int main()
         free(dataArrays->class[j]);
     }
     free(dataArrays);
+    free(class);
 
+    printf("GOODBYE!!!!!!\n");
     return 0;
 }
 
@@ -148,10 +162,6 @@ void printStatistics(double caracteristicas[DATA_LENGTH][4], char *atributos[5],
     printf("Estatísticas\n");
     printf("------------------------------\n");
 
-
-    getAllOcorrencias(classes);
-
-
     for(int i = 0; i < 4; i++) {
         printf("%s\n", atributos[i]);
         printf("Mínimo: %lf\n", getMinimo(caracteristicas, i));
@@ -167,6 +177,7 @@ void printStatistics(double caracteristicas[DATA_LENGTH][4], char *atributos[5],
     printf("Iris-setosa: %d ocorrências\n", ocorrencias[0]);
     printf("Iris-versicolor: %d ocorrências\n", ocorrencias[1]);
     printf("Iris-virginica: %d ocorrências\n", ocorrencias[2]);
+    free(ocorrencias);
 }
 
 double getMinimo(double caracteristicas[DATA_LENGTH][4], int col) {
@@ -241,4 +252,28 @@ int getOcorrencias(char *classes[DATA_LENGTH], char *classe) {
         }
     }
     return ocorrencias;
+}
+
+char* guessClass(double attributes[DATA_LENGTH][4], char* classes[DATA_LENGTH], struct IrisInformation input) {
+    char *class = malloc(256 * sizeof(char));
+    class = classes[0];
+    double distance = 100;
+    for(int i = 0; i < DATA_LENGTH; i++) { 
+        double inputAttributes[4] = {input.sepal_length, input.sepal_width, input.petal_length, input.petal_width};
+        double currentDistance = dist(inputAttributes, attributes[i]);
+        if(currentDistance < distance) {
+            distance = currentDistance;
+            class = classes[i];
+        }
+    }
+    return class;
+}
+
+double dist(double attr1[4], double attr2[4]) {
+    double distance = 0;
+    for(int i = 0; i < 4; i++) {
+        distance += (attr1[i] - attr2[i]) * (attr1[i] - attr2[i]);
+    }
+    distance = sqrt(distance);
+    return distance;
 }
