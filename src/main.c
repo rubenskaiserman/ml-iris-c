@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 struct IrisInformation
 {
@@ -14,17 +15,18 @@ struct IrisInformation
 struct IrisInformationArrays
 {
     char *atributos[5];
-    double caracteristicas[150][4];
-    char *class[150];
+    double caracteristicas[DATA_LENGTH][4];
+    char *class[DATA_LENGTH];
 };
 
-const int DATA_SIZE = 150;
-struct IrisInformationArrays *getDataFrom(const char *path);
-void printMenu(void);
+const int DATA_LENGTH = DATA_LENGTH;
+struct IrisInformationArrays *getDataFrom(char *path);
+void printMenu();
+
 
 int main()
 {
-    const char *path = "../database/iris.csv";
+    char *path = "../database/iris.csv";
     struct IrisInformationArrays *dataArrays = getDataFrom(path);
     // Assume-se que foram obtidos os dados
     int resposta;
@@ -47,7 +49,7 @@ int main()
     }
 
     // Freeing allocated memory
-    for (int j = 0; j < DATA_SIZE; j++)
+    for (int j = 0; j < DATA_LENGTH; j++)
     {
         free(dataArrays->class[j]);
     }
@@ -56,9 +58,11 @@ int main()
     return 0;
 }
 
-struct IrisInformationArrays *getDataFrom(const char *path)
+struct IrisInformationArrays *getDataFrom(char *path)
 {
-    struct IrisInformation *data = malloc(DATA_SIZE * sizeof(struct IrisInformation));
+    const int LINE_SIZE = 256;
+    
+    struct IrisInformation *data = malloc(DATA_LENGTH * sizeof(struct IrisInformation));
     if (data == NULL)
     {
         printf("Memory allocation failed.\n");
@@ -72,11 +76,11 @@ struct IrisInformationArrays *getDataFrom(const char *path)
         exit(1);
     }
 
-    char *line = malloc(100 * sizeof(char));
-    fgets(line, 100, file); // skipping column name line
+    char *line = malloc(LINE_SIZE * sizeof(char));
+    fgets(line, LINE_SIZE, file); // skipping column name line
 
     int i = 0;
-    while (fgets(line, 100, file) != NULL)
+    while (fgets(line, LINE_SIZE, file) != NULL)
     {
         struct IrisInformation iris;
         char *token = strtok(line, ",");
@@ -105,7 +109,7 @@ struct IrisInformationArrays *getDataFrom(const char *path)
         exit(1);
     }
 
-    for (int i = 0; i < DATA_SIZE; i++)
+    for (int i = 0; i < DATA_LENGTH; i++)
     {
         arrays->caracteristicas[i][0] = data[i].sepal_length;
         arrays->caracteristicas[i][1] = data[i].sepal_width;
@@ -123,9 +127,50 @@ struct IrisInformationArrays *getDataFrom(const char *path)
     return arrays;
 }
 
-void printMenu(void)
+void printMenu()
 {
     printf("\n\n\n------------------------------\n");
     printf("[1] – Mostrar estatísticas\n\n[2] – Classificar amostra\n\n[3] – Sair\n\n");
     printf("------------------------------\n\n\n");
+}
+
+double getMinimo(double caracteristicas[DATA_LENGTH][4], int col) {
+    double minimo = caracteristicas[0][col];
+    for(int i = 0; i < DATA_LENGTH; i++) {
+        if(caracteristicas[i][col] < minimo) {
+            minimo = caracteristicas[i][col];
+        }
+    }
+    return minimo;
+}
+
+double getMaximo(double caracteristicas[DATA_LENGTH][4], int col) {
+    double maximo = caracteristicas[0][col];
+    for(int i = 0; i < DATA_LENGTH; i++) {
+        if(caracteristicas[i][col] > maximo) {
+            maximo = caracteristicas[i][col];
+        }
+    }
+    return maximo;
+}
+
+double getMedia(double caracteristicas[DATA_LENGTH][4], int col) {
+    double media = 0;
+    for(int i = 0; i < DATA_LENGTH; i++) {
+        media += caracteristicas[i][col];
+    }
+    media /= DATA_LENGTH;
+    return media;
+}
+
+double desvio_padrao(double caracteristicas[DATA_LENGTH][4], int col) {
+    double media = getMedia(caracteristicas, col);
+    double desvio_padrao = 0;
+    for(int i = 0; i < DATA_LENGTH; i++) {
+        desvio_padrao += (media - caracteristicas[i][col]) * (media - caracteristicas[i][col]);
+    }
+    desvio_padrao /= DATA_LENGTH;
+    desvio_padrao = sqrt(desvio_padrao);
+
+    return desvio_padrao;
 }
